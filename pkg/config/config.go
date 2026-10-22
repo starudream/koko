@@ -53,8 +53,9 @@ type Config struct {
 	RedisSentinelHosts    string `mapstructure:"REDIS_SENTINEL_HOSTS"`
 	RedisUseSSL           bool   `mapstructure:"REDIS_USE_SSL"`
 
-	EnableLocalPortForward bool `mapstructure:"ENABLE_LOCAL_PORT_FORWARD"`
-	EnableVscodeSupport    bool `mapstructure:"ENABLE_VSCODE_SUPPORT"`
+	EnableLocalPortForward  bool `mapstructure:"ENABLE_LOCAL_PORT_FORWARD"`
+	EnableVscodeSupport     bool `mapstructure:"ENABLE_VSCODE_SUPPORT"`
+	EnableGenericTCPForward bool `mapstructure:"ENABLE_GENERIC_TCP_FORWARD"`
 
 	EnableReversePortForward bool `mapstructure:"ENABLE_REVERSE_PORT_FORWARD"`
 

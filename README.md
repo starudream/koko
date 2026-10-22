@@ -34,6 +34,11 @@ make
 
 ## Usage (for Linux amd64 server)
 
+The custom generic SSH TCP forwarding feature supports sessionless `ssh -N -L`
+and `-D` with `ENABLE_GENERIC_TCP_FORWARD: true`. Core authentication and managed
+SSH asset/account authorization remain required. See the
+[forwarding and All-in-One replacement guide](docs/generic-tcp-forward.md).
+
 1. Copy the compressed package file to the corresponding server
 
 ```

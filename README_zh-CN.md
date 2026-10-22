@@ -36,6 +36,11 @@ make
 
 ## 使用 (以 Linux amd64 服务器为例)
 
+自定义通用 SSH TCP 转发只需设置 `ENABLE_GENERIC_TCP_FORWARD: true`，支持无
+Session 的 `ssh -N -L` 和 `-D`。认证、资产及托管账号授权仍由 Core 执行。
+配置、CI 二进制包和 All-in-One 手动替换步骤见
+[通用 TCP 转发说明](docs/generic-tcp-forward.md)。
+
 1.拷贝压缩包文件到对应的服务器
 
 ```

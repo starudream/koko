@@ -1,0 +1,20 @@
+{
+  "upstream_repository": "https://github.com/jumpserver/koko.git",
+  "default_tag": "v4.10.19",
+  "patch_revision": 1,
+  "validated_baseline": {
+    "tag": "v4.10.19",
+    "sha": "1a6befc9c75d1e1726787d7635fa2aee2593ab05"
+  },
+  "patches": [
+    "patches/generic-tcp-forward.patch"
+  ],
+  "dependency_fixes": [
+    {
+      "id": "upstream-pr-2085",
+      "reference": "https://github.com/jumpserver/koko/pull/2085",
+      "module": "golang.org/x/crypto",
+      "minimum": "v0.56.0"
+    }
+  ]
+}

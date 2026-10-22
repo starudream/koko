@@ -136,10 +136,17 @@ func (s *Server) NewSftpHandler(user *model.User, addr string) *SftpHandler {
 
 func (s *Server) LocalPortForwardingPermission(ctx ssh.Context, dstHost string, dstPort uint32) bool {
 	logger.Debugf("LocalPortForwardingPermission: %s %s %d", ctx.User(), dstHost, dstPort)
-	return config.GlobalConfig.EnableLocalPortForward
+	cf := config.GetConf()
+	return cf.EnableLocalPortForward || cf.EnableGenericTCPForward
 }
 
 func (s *Server) DirectTCPIPChannelHandler(ctx ssh.Context, newChan gossh.NewChannel, destAddr string) {
+	cf := config.GetConf()
+	// 已建立的 VS Code 会话继续使用原路径；纯转发不依赖普通 SSH Session。
+	if cf.EnableGenericTCPForward && (!cf.EnableLocalPortForward || !cf.EnableVscodeSupport || s.getVSCodeReq(ctx.SessionID()) == nil) {
+		s.genericTCPIPChannelHandler(ctx, newChan, destAddr)
+		return
+	}
 	if !config.GetConf().EnableVscodeSupport {
 		_ = newChan.Reject(gossh.Prohibited, "port forwarding is disabled")
 		return
