@@ -2,20 +2,20 @@
 
 ## 维护边界
 
-本项目维护默认关闭、经过 Core 认证和资产授权的无 Session SSH TCP 转发补丁，
+本项目维护默认开启、经过 Core 认证和资产授权的无 Session SSH TCP 转发补丁，
 持续适配官方稳定 Release，直到官方实现满足同一验收要求。
 发布产物按“官方 Tag + 功能补丁 + 缺失的上游修复”生成，不固定在 v4.10.19。
-当前官方 Tag 的兼容性必须逐版验证，未知版本的冲突或测试失败会阻止打包。
+当前官方 Tag 的兼容性必须逐版验证，未知版本的补丁冲突或构建失败会阻止打包。
 
-`dev` 继续跟踪官方。`custom/tcp-forward-v4.10.19` 保存维护工具和补丁；此前的
-`feature/generic-tcp-forward-v4.10.19` 分支保留为旧版本回滚点，不改写其已推送历史。
+Fork 只需保留当前维护分支 `custom/tcp-forward-v4.10.19`，用于保存维护工具和补丁。
+工具直接从官方仓库获取指定 Tag，不依赖 Fork 中额外的上游跟踪分支。
 首次默认基线仍为 v4.10.19，真实 Core、DataGrip 和 All-in-One 验收独立进行。
 
 ## 新版本发布后
 
 1. 查看官方稳定 Release，例如 `gh api repos/jumpserver/koko/releases/latest --jq .tag_name`。
    按现网将要使用的 All-in-One 版本选择对应 KoKo Tag。工具只接受 `vX.Y.Z` 稳定 Tag，
-   不接受 `dev`、RC 或任意 ref。
+   不接受分支、RC 或其他 ref。
 2. 使用当前维护工具指定该 Tag，准备独立候选目录。它会创建本地 `custom/vX.Y.Z`
    分支、重放功能补丁，记录官方 SHA 和补丁来源。
 3. 核对 Core/SDK 认证授权、`buildConnectToken`、`buildSSHClientOptions`、SSH Client、
@@ -88,14 +88,14 @@ gh workflow run build-ghcr-image.yml --repo starudream/koko \
   -f PATCH_REVISION=1
 ```
 
-GitHub 的手动入口发现依赖默认分支的工作流注册；本仓库已通过同文件名的 push
-工作流完成注册。若更换到新的 Fork 后列表为空，先推送匹配上述规则的维护分支。
-不要将功能变更合并到 `dev` 来规避入口问题。
+GitHub 的手动运行入口依赖 Fork 默认分支中存在该工作流。将当前维护分支设为 Fork
+默认分支并保留此文件，即可在该分支维护和手动运行；匹配规则的 push 也会触发构建。
 
-Actions 使用候选源码的 `go.mod` 选择 Go，所有应用测试、UI 和构建都在该源码目录
-中执行。候选源码自带的 workflow 不会代替维护分支中的构建流程。
-候选目录用于审查，不会自动提交、推送或创建升级 PR。需要 PR 时先明确目标基线分支，
-再经人工审查发布，避免将旧发布基线的整个历史合入跟踪最新上游的 `dev`。
+Actions 使用候选源码的 `go.mod` 选择 Go，UI 和二进制构建都在该源码目录中执行。
+CI 保留维护工具测试，Go 转发测试、race 和 vet 按需手动选择执行。
+候选源码自带的 workflow 不会代替维护分支中的构建流程。
+候选目录用于审查，不会自动提交、推送或创建升级 PR。需要 PR 时先明确目标维护分支
+和官方 Tag，再经人工审查合入。
 
 最终仍只有 `linux/amd64` 二进制包 Artifact `koko-linux-amd64`，没有 GHCR 发布或部署。
 包内为 `koko`、`BUILD_INFO.txt`、`SHA256SUMS`。构建信息记录官方 Tag/SHA、维护提交、

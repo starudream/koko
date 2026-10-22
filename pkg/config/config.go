@@ -169,10 +169,11 @@ func getDefaultConfig() Config {
 		RedisPort:           "6379",
 		RedisPassword:       "",
 
-		EnableLocalPortForward: false,
-		EnableVscodeSupport:    false,
-		KokoPrivileged:         true,
-		DisableInputAsCommand:  true,
+		EnableLocalPortForward:  false,
+		EnableVscodeSupport:     false,
+		EnableGenericTCPForward: true,
+		KokoPrivileged:          true,
+		DisableInputAsCommand:   true,
 	}
 
 }

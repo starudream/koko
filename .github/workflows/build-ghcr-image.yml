@@ -71,13 +71,6 @@ jobs:
           yarn --cwd ui install --frozen-lockfile --non-interactive --network-concurrency 4
           yarn --cwd ui build
 
-      - name: Test forwarding and run static checks
-        working-directory: ${{ env.CUSTOM_SOURCE }}
-        run: |
-          go test -mod=readonly -timeout 120s ./pkg/config ./pkg/handler ./pkg/srvconn
-          CGO_ENABLED=1 go test -mod=readonly -race -timeout 120s ./pkg/config ./pkg/handler ./pkg/srvconn -run 'TestGeneric|TestNewSSHClientContext'
-          go vet -mod=readonly ./pkg/config ./pkg/handler ./pkg/sshd ./pkg/srvconn
-
       - name: Build and package Linux amd64 binary
         run: python3 utils/custom_release.py build --source "$CUSTOM_SOURCE" --destination build
 

@@ -1,19 +1,19 @@
 diff --git a/config_example.yml b/config_example.yml
-index dfebf587f52e877860689c7836fc63aad587002d..389d37b1ba090e75b783717e1f8896d58cf16c44 100644
+index dfebf587f52e877860689c7836fc63aad587002d..282fe2b3aa54ba91f03d20a77c6a80cf13ec84d5 100644
 --- a/config_example.yml
 +++ b/config_example.yml
 @@ -66,5 +66,9 @@ BOOTSTRAP_TOKEN: <PleasgeChangeSameWithJumpserver>
  # 是否开启 针对 vscode 的 remote-ssh 远程开发支持 (前置条件: 必须开启 ENABLE_LOCAL_PORT_FORWARD )
  # ENABLE_VSCODE_SUPPORT: false
  
-+# 通用 SSH TCP 转发，支持无 Session 的 ssh -N -L/-D，默认关闭。
++# 通用 SSH TCP 转发，支持无 Session 的 ssh -N -L/-D，默认开启。
 +# 仅需此开关，由 Core 授权的 SSH 资产访问客户端指定的 TCP 目标。
-+# ENABLE_GENERIC_TCP_FORWARD: false
++# ENABLE_GENERIC_TCP_FORWARD: true
 +
  # KoKo 是否以 privileged 权限运行。为 false 时，Kubernetes 集群连接会提示部署权限不足
  # KOKO_PRIVILEGED: true
 diff --git a/pkg/config/config.go b/pkg/config/config.go
-index 830ef52503dbb098045cef73ef609de031a26aea..48333d9f26d395cc4a95a21477831e0bf3585067 100644
+index 830ef52503dbb098045cef73ef609de031a26aea..44283da79cebb47edba2e66f0f3487722d589230 100644
 --- a/pkg/config/config.go
 +++ b/pkg/config/config.go
 @@ -53,8 +53,9 @@ type Config struct {
@@ -28,6 +28,22 @@ index 830ef52503dbb098045cef73ef609de031a26aea..48333d9f26d395cc4a95a21477831e0b
  
  	EnableReversePortForward bool `mapstructure:"ENABLE_REVERSE_PORT_FORWARD"`
  
+@@ -168,10 +169,11 @@ func getDefaultConfig() Config {
+ 		RedisPort:           "6379",
+ 		RedisPassword:       "",
+ 
+-		EnableLocalPortForward: false,
+-		EnableVscodeSupport:    false,
+-		KokoPrivileged:         true,
+-		DisableInputAsCommand:  true,
++		EnableLocalPortForward:  false,
++		EnableVscodeSupport:     false,
++		EnableGenericTCPForward: true,
++		KokoPrivileged:          true,
++		DisableInputAsCommand:   true,
+ 	}
+ 
+ }
 diff --git a/pkg/config/generic_tcp_forward_test.go b/pkg/config/generic_tcp_forward_test.go
 new file mode 100644
 index 0000000000000000000000000000000000000000..b306d8a284ae0fb63bae87f461681bea3345a8ed

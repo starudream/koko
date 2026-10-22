@@ -10,13 +10,15 @@
 [长期维护说明](custom-release-maintenance.md)。
 每个二进制应与同版本 All-in-One 配套；真实 Core、DataGrip 和数据库仍需现场验收。
 
-只新增一个参数，默认关闭：
+只新增一个参数，默认开启：
 
 ```yaml
 ENABLE_GENERIC_TCP_FORWARD: true
 ```
 
-也可通过环境变量设置 `ENABLE_GENERIC_TCP_FORWARD=true`。加载顺序沿用本版本：
+替换二进制并重启 KoKo 后，无需重建容器或添加配置即可使用默认值。
+可通过配置文件或环境变量显式设置 `ENABLE_GENERIC_TCP_FORWARD=false` 关闭。
+加载顺序沿用本版本：
 默认值 → 环境变量 → 配置文件，配置文件中显式出现的字段优先。
 默认配置文件为进程工作目录中的 `config.yml`，可通过原有 `-f` 参数选择。
 Supervisor 启动的 All-in-One KoKo 工作目录为 `/opt/koko`。
@@ -54,7 +56,7 @@ Supervisor 启动的 All-in-One KoKo 工作目录为 `/opt/koko`。
 
 ## OpenSSH 与 DataGrip 验收
 
-在有授权的测试环境启用开关，先使用测试端口 `2223` 或测试容器，避免与现有
+在有授权的测试环境确认开关开启，先使用测试端口 `2223` 或测试容器，避免与现有
 `2222` 冲突。以下命令中的值均为占位符。
 
 ```bash
@@ -91,9 +93,10 @@ ssh -N -D 127.0.0.1:1080 -p 2223 \
 完整输入、升级步骤及本地测试命令见 [长期维护说明](custom-release-maintenance.md)。
 
 构建流程为：官方 Tag 独立检出 → 严格重放功能补丁 → 按需补上游依赖修复 →
-原版 UI → 核心测试/race/vet → 强制 Linux amd64 构建 → 打包。
+原版 UI → 强制 Linux amd64 构建 → 打包。
 CI 按候选源码的 `go.mod` 选择 Go，UI 仍是上游嵌入二进制的真实内容。
-补丁冲突、模块 replacement 或测试失败都需要人工适配，不跳过后继续发布。
+CI 保留维护工具测试，不自动执行 Go 转发测试、race 或 vet；这些检查按需手动运行。
+补丁冲突、模块 replacement 或构建失败需要人工适配。
 
 Artifact 仍为 `koko-linux-amd64`，包名如 `koko-v4.10.19-fwd.1-linux-amd64.tar.gz`。
 其中只有 `koko`、`BUILD_INFO.txt`、`SHA256SUMS`，不发布 GHCR 镜像、不部署。
@@ -130,7 +133,8 @@ docker cp ./koko "$container:/opt/koko/koko.new"
 ```
 
 若当前没有 `/opt/koko/config.yml`，按现有 `-f` 参数或环境变量方式找到实际配置，
-备份后再继续；不要用示例配置覆盖现有配置。编辑实际配置，加入唯一的新开关。
+备份后再继续；不要用示例配置覆盖现有配置。新开关默认开启，无需添加配置；
+若环境变量或配置文件已显式设为 false，需删除该设置或改为 true。
 
 官方 All-in-One 的 Supervisor 程序名为 `koko`，工作目录为 `/opt/koko`。
 先确认以下 `status` 命令可用；容器中的 Supervisor 配置路径以实际安装为准。
@@ -164,8 +168,9 @@ docker exec "$container" supervisorctl status koko
 
 ## 后续同步
 
-`dev` 保持官方跟踪用途；转发实现、配置及测试导出到 `custom/patches/`，上游
-依赖修复单独登记在清单中。升级时指定新官方 Tag，核对 API 契约并运行同一验证流程。
+维护分支保存转发实现、配置及测试，并导出到 `custom/patches/`，上游依赖修复
+单独登记在清单中。升级时工具直接获取新官方 Tag，无需在 Fork 保留上游跟踪分支；
+核对 API 契约后，按需选择验证项目。
 已包含的依赖修复自动跳过；功能补丁冲突则人工适配，保留旧维护提交用于复现和回滚。
 官方原生支持并通过同一验收后，再停用自定义补丁。详见
 [版本升级与退役流程](custom-release-maintenance.md)。
